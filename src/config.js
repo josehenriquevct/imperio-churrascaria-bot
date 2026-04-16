@@ -40,6 +40,7 @@ export const config = {
   firebase: {
     dbUrl: process.env.FIREBASE_DB_URL || '',
     authSecret: process.env.FIREBASE_AUTH_SECRET || '',
+    prefix: process.env.FIREBASE_PREFIX || 'imperio',
   },
 
   // Cardapio (imagem)

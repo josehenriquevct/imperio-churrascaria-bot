@@ -8,9 +8,10 @@ if (!config.firebase.dbUrl) {
 
 var base = config.firebase.dbUrl.replace(/\/$/, '');
 var authParam = config.firebase.authSecret ? ('?auth=' + config.firebase.authSecret) : '';
+var prefix = config.firebase.prefix ? config.firebase.prefix + '/' : '';
 
 async function req(method, path, body) {
-  var url = base + '/' + path + '.json' + authParam;
+  var url = base + '/' + prefix + path + '.json' + authParam;
   var opts = { method: method, headers: { 'Content-Type': 'application/json' } };
   if (body !== undefined) opts.body = JSON.stringify(body);
   var res = await fetch(url, opts);
