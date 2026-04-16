@@ -118,6 +118,7 @@ export async function systemPrompt(configLoja) {
     + '   Quando escolher Pix, envie a chave SOMENTE os numeros, sem pontos ou barras, em uma linha separada pra copiar e colar:\n'
     + '   ' + pixChaveNumeros + '\n'
     + '   Diga: "Segue a chave Pix pra copiar:"\n'
+    + '   Depois de enviar a chave, peca o comprovante: "Quando fizer o Pix, manda o comprovante aqui pra eu confirmar!"\n'
     + '\n'
     + '7. COMPROVANTE PIX:\n'
     + '   Se o cliente enviar uma IMAGEM, pode ser um comprovante de Pix.\n'
