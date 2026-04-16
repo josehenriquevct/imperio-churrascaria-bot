@@ -3,6 +3,7 @@ import { config } from './config.js';
 import { processarMensagem, processarPedidoInterno, transcreverAudio } from './ai.js';
 import { enviarMensagem, mostrarDigitando, parseWebhook, baixarMidiaBase64 } from './evolution.js';
 import { adicionarMensagem, salvarConversa, getConversa, upsertCliente, fb } from './firebase.js';
+import { getDados } from './state.js';
 import {
   verificarRateLimit,
   verificarWebhookToken,
@@ -115,6 +116,17 @@ router.post('/webhook', async function(req, res) {
   var msg = parseWebhook(req.body);
   if (!msg) return;
 
+  // ── ATENDENTE HUMANO RESPONDEU (fromMe) → pausar bot ───────
+  if (msg.fromMe) {
+    try {
+      await salvarConversa(msg.telefone, { status: 'pausado_humano' });
+      console.log('Bot PAUSADO para ' + msg.telefone + ' (atendente humano respondeu)');
+    } catch (e) {
+      console.error('Erro ao pausar conversa:', e.message);
+    }
+    return;
+  }
+
   if (!verificarRateLimit(msg.telefone)) {
     console.warn('Rate limit: ' + msg.telefone);
     return;
@@ -161,8 +173,11 @@ router.post('/webhook', async function(req, res) {
 
   if (msg.localizacao) {
     try {
-      await upsertCliente({ telefone: msg.telefone, endereco: 'Localizacao', localizacao: msg.localizacao });
-      await adicionarMensagem(msg.telefone, { role: 'user', texto: msg.texto, pushName: msg.pushName });
+      var dadosLoc = getDados(msg.telefone);
+      dadosLoc.localizacao = msg.localizacao;
+      dadosLoc.endereco = msg.localizacao.endereco || 'Localizacao GPS';
+      await upsertCliente({ telefone: msg.telefone, endereco: dadosLoc.endereco, localizacao: msg.localizacao });
+      console.log('Localizacao salva para ' + msg.telefone + ': ' + msg.localizacao.lat + ',' + msg.localizacao.lng);
     } catch (e) {
       console.error('Erro localizacao:', e.message);
     }

@@ -6,7 +6,7 @@ import {
   totalCarrinho, removerDoCarrinho,
 } from './state.js';
 import { criarPedidoAberto, upsertCliente, salvarConversa, fb } from './firebase.js';
-import { enviarImagem } from './evolution.js';
+import { enviarImagem, enviarLocalizacao } from './evolution.js';
 
 // ── Declarações das tools (formato Gemini) ─────────────────────
 export const TOOL_DECLARATIONS = [{
@@ -29,6 +29,11 @@ export const TOOL_DECLARATIONS = [{
     {
       name: 'enviar_foto_cardapio',
       description: 'Envia a foto/imagem do cardápio completo para o cliente pelo WhatsApp. Use SEMPRE que o cliente pedir para ver o cardápio ou menu.',
+      parameters: { type: 'OBJECT', properties: {} },
+    },
+    {
+      name: 'enviar_localizacao_loja',
+      description: 'Envia a localização do restaurante como pin no WhatsApp. Use quando o cliente perguntar onde fica ou pedir a localização.',
       parameters: { type: 'OBJECT', properties: {} },
     },
     {
@@ -143,6 +148,22 @@ export async function executarTool(telefone, nome, args) {
       } catch (e) {
         console.error('Erro ao enviar foto do cardápio:', e.message);
         return { sucesso: false, erro: 'Não consegui enviar a foto, mas posso listar os itens em texto' };
+      }
+    }
+
+    case 'enviar_localizacao_loja': {
+      try {
+        var lat = config.restaurante.lat;
+        var lng = config.restaurante.lng;
+        if (!lat || !lng) {
+          return { sucesso: false, erro: 'Coordenadas da loja não configuradas.' };
+        }
+        await enviarLocalizacao(telefone, lat, lng, config.restaurante.nome, config.restaurante.endereco);
+        console.log('Localizacao da loja enviada para ' + telefone);
+        return { sucesso: true, mensagem: 'Localização do restaurante enviada com sucesso' };
+      } catch (e) {
+        console.error('Erro ao enviar localizacao:', e.message);
+        return { sucesso: false, erro: 'Não consegui enviar a localização. Nosso endereço é: ' + config.restaurante.endereco };
       }
     }
 

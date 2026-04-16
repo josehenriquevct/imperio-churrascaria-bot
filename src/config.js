@@ -18,9 +18,11 @@ export const config = {
   // Restaurante
   restaurante: {
     nome: process.env.RESTAURANTE_NOME || 'Império Churrascaria',
-    endereco: process.env.ENDERECO_LOJA || 'Rua Joaquim Inácio 286 - Jataí/GO',
+    endereco: process.env.ENDERECO_LOJA || 'Rua Joaquim Inácio 286 - Vicentinópolis/GO',
     horario: process.env.HORARIO_FUNCIONAMENTO || 'Segunda a Sábado, 10:30 às 14:00',
     taxaEntrega: parseFloat(process.env.TAXA_ENTREGA || '0'),
+    lat: parseFloat(process.env.LOJA_LAT || '-17.7322'),
+    lng: parseFloat(process.env.LOJA_LNG || '-49.8047'),
   },
 
   // Gemini

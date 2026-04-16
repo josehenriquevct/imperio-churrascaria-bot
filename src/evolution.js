@@ -45,6 +45,19 @@ export async function enviarImagem(telefone, imageUrl, caption) {
   console.log('Imagem enviada -> ' + numero);
 }
 
+// ── Enviar localizacao ────────────────────────────────────────
+export async function enviarLocalizacao(telefone, lat, lng, nomeLocal, enderecoLocal) {
+  const numero = String(telefone).replace(/\D+/g, '');
+  await evoReq('/message/sendLocation/' + INSTANCE, 'POST', {
+    number: numero,
+    latitude: lat,
+    longitude: lng,
+    name: nomeLocal || '',
+    address: enderecoLocal || '',
+  });
+  console.log('Localizacao enviada -> ' + numero);
+}
+
 // ── Mostrar "digitando..." ─────────────────────────────────────
 export async function mostrarDigitando(telefone, duracaoMs) {
   if (duracaoMs === undefined) duracaoMs = 1500;
@@ -82,7 +95,11 @@ export function parseWebhook(body) {
     var data = (body && body.data) ? body.data : body;
     if (!data) return null;
 
-    if (data.key && data.key.fromMe === true) return null;
+    if (data.key && data.key.fromMe === true) {
+      var remoteJidFromMe = (data.key && data.key.remoteJid) ? data.key.remoteJid : '';
+      if (remoteJidFromMe.indexOf('@s.whatsapp.net') === -1) return null;
+      return { telefone: remoteJidFromMe.split('@')[0], texto: '', pushName: '', fromMe: true };
+    }
 
     var remoteJid = (data.key && data.key.remoteJid) ? data.key.remoteJid : '';
     if (remoteJid.indexOf('@s.whatsapp.net') === -1) return null;
