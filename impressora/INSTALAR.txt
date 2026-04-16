@@ -1,0 +1,60 @@
+================================================================
+  COMO INSTALAR A IMPRESSORA DE PEDIDOS
+  Imperio Churrascaria
+================================================================
+
+REQUISITOS:
+- Windows 10 ou 11
+- Impressora termica 80mm conectada por USB
+- Node.js instalado (baixar em: https://nodejs.org)
+
+PASSO A PASSO:
+
+1. Instalar o Node.js
+   - Acesse https://nodejs.org e baixe a versao LTS
+   - Instale normalmente (proximo, proximo, concluir)
+
+2. Copiar a pasta "impressora" para o PC do restaurante
+   - Pode ser na area de trabalho
+
+3. Abrir o Prompt de Comando (CMD)
+   - Aperte Windows + R, digite "cmd" e aperte Enter
+
+4. Navegar ate a pasta da impressora
+   - Digite: cd "C:\Users\SEU_USUARIO\Desktop\impressora"
+   (troque SEU_USUARIO pelo nome do usuario do Windows)
+
+5. Instalar as dependencias
+   - Digite: npm install
+   - Aguarde terminar
+
+6. IMPORTANTE - Driver da impressora
+   - Instale o driver Zadig para a impressora funcionar via USB
+   - Baixe em: https://zadig.akeo.ie
+   - Abra o Zadig, selecione sua impressora e instale o driver WinUSB
+
+7. Testar SEM impressora (modo teste)
+   - Digite: npm run test
+   - Vai mostrar os pedidos no terminal sem imprimir
+
+8. Rodar COM impressora
+   - Ligue a impressora e conecte o USB
+   - Digite: npm start
+
+PARA RODAR AUTOMATICAMENTE QUANDO LIGAR O PC:
+   - Aperte Windows + R
+   - Digite: shell:startup
+   - Crie um atalho do arquivo "iniciar.bat" nessa pasta
+   (crie o arquivo iniciar.bat com o conteudo abaixo)
+
+CONTEUDO DO iniciar.bat:
+   @echo off
+   cd /d "C:\Users\SEU_USUARIO\Desktop\impressora"
+   node imprimir.js
+
+PROBLEMAS COMUNS:
+- "Impressora nao encontrada" = Verifique USB e driver Zadig
+- "EACCES" = Rode o CMD como Administrador
+- "node nao reconhecido" = Reinstale o Node.js
+
+================================================================
