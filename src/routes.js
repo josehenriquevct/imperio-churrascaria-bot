@@ -169,6 +169,39 @@ router.post('/webhook', async function(req, res) {
   // ── CLIENTE NORMAL ──────────────────────────────────────────
   if (!msg.texto && !msg.audio && !msg.image) return;
 
+  // ── VERIFICAR HORARIO DE FUNCIONAMENTO ─────────────────────
+  try {
+    var botCfg = (await fb.get('bot_config/bot')) || {};
+    if (botCfg.horarioAtivo) {
+      var agora = new Date();
+      // Converter para horário de Brasília (UTC-3)
+      var brasilOffset = -3 * 60;
+      var utcMs = agora.getTime() + (agora.getTimezoneOffset() * 60000);
+      var brasilDate = new Date(utcMs + (brasilOffset * 60000));
+      var diaSemana = brasilDate.getDay(); // 0=dom, 1=seg, ..., 6=sab
+      var horaAtual = brasilDate.getHours() * 60 + brasilDate.getMinutes(); // minutos desde meia-noite
+
+      var diasPermitidos = botCfg.diasFuncionamento || [1, 2, 3, 4, 5, 6];
+      var diaAberto = diasPermitidos.indexOf(diaSemana) !== -1;
+
+      var abreParts = (botCfg.horaAbertura || '10:30').split(':');
+      var fechaParts = (botCfg.horaFechamento || '14:00').split(':');
+      var abreMin = parseInt(abreParts[0]) * 60 + parseInt(abreParts[1] || 0);
+      var fechaMin = parseInt(fechaParts[0]) * 60 + parseInt(fechaParts[1] || 0);
+      var horarioAberto = horaAtual >= abreMin && horaAtual <= fechaMin;
+
+      if (!diaAberto || !horarioAberto) {
+        var msgFechado = botCfg.msgFechado || 'Oi! Estamos fechados no momento. Nosso horario e de segunda a sabado, 10:30 as 14:00. Te esperamos!';
+        await enviarMensagem(msg.telefone, msgFechado);
+        console.log('Fora do horario - msg enviada para ' + msg.telefone);
+        return;
+      }
+    }
+  } catch (e) {
+    console.warn('Erro ao verificar horario:', e.message);
+    // Se der erro, continua normalmente
+  }
+
   console.log('Msg de ' + msg.telefone + ' (' + (msg.pushName || '?') + '): ' + msg.texto.slice(0, 80));
 
   if (msg.localizacao) {
