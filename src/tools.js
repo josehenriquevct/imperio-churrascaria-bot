@@ -302,16 +302,28 @@ export async function executarTool(telefone, nome, args) {
         },
       };
 
+      if (dados.modoAgendado) {
+        pedido.agendado = true;
+        pedido.agendadoPara = dados.horaAbertura || '';
+        pedido.status = 'agendado';
+      }
+
       try {
         const criado = await criarPedidoAberto(pedido);
         limparEstado(telefone);
+
+        const instrucaoCodigo = pedido.agendado
+          ? `Pedido AGENDADO. Informe ao cliente o código ${criado.codigoConfirmacao}. Vai pro preparo assim que abrirmos as ${pedido.agendadoPara}.`
+          : `Informe ao cliente o código de confirmação: ${criado.codigoConfirmacao}. Previsão de entrega: 15 a 25 minutos.`;
 
         return {
           sucesso: true,
           pedido_id: criado.key,
           total,
           codigoConfirmacao: criado.codigoConfirmacao,
-          instrucao_codigo: `Informe ao cliente o código de confirmação: ${criado.codigoConfirmacao}. Previsão de entrega: 15 a 25 minutos.`,
+          agendado: !!pedido.agendado,
+          agendado_para: pedido.agendadoPara || '',
+          instrucao_codigo: instrucaoCodigo,
         };
       } catch (e) {
         return { sucesso: false, erro: 'Falha ao salvar pedido: ' + e.message };

@@ -29,28 +29,8 @@ export async function transcreverAudio(base64Audio, mimetype) {
   }
 }
 
-// ── Analisar imagem via Gemini (comprovante Pix, etc.) ─────────
-export async function analisarImagem(base64Img, mimetype) {
-  if (!mimetype) mimetype = 'image/jpeg';
-  try {
-    var model = genAI.getGenerativeModel({ model: MODELO });
-    var result = await model.generateContent([
-      { inlineData: { mimeType: mimetype, data: base64Img } },
-      { text: 'Analise esta imagem. Se for um comprovante de pagamento Pix, extraia: valor, data/hora, nome do pagador e nome do recebedor. Responda EXATAMENTE neste formato: "[COMPROVANTE PIX DETECTADO: valor=R$XX,XX | pagador=NOME | recebedor=NOME | data=DD/MM/AAAA HH:MM]". Se NAO for um comprovante de pagamento, responda exatamente: "[IMAGEM ANALISADA: nao e comprovante]". Nao adicione nenhum outro texto.' },
-    ]);
-    var analise = result.response.text();
-    if (analise) analise = analise.trim();
-    if (!analise) return '[IMAGEM ANALISADA: nao e comprovante]';
-    console.log('Analise imagem: ' + analise.slice(0, 100));
-    return analise;
-  } catch (e) {
-    console.error('Erro ao analisar imagem:', e.message);
-    return '[erro ao analisar imagem]';
-  }
-}
-
 // ── Processar mensagem do cliente (fluxo normal) ────────────────
-export async function processarMensagem(telefone, texto, pushName, imagemData) {
+export async function processarMensagem(telefone, texto, pushName) {
   var conversaAtual = await getConversa(telefone).catch(function() { return null; });
   if (conversaAtual && conversaAtual.status === 'pausado_humano') return null;
 
@@ -67,16 +47,8 @@ export async function processarMensagem(telefone, texto, pushName, imagemData) {
     referencia: dados.referencia || '',
     temLocalizacao: !!(loc && loc.lat && loc.lng),
   };
-
-  if (imagemData && imagemData.base64) {
-    try {
-      var analise = await analisarImagem(imagemData.base64, imagemData.mimetype || 'image/jpeg');
-      texto = texto + '\n' + analise;
-      console.log('Imagem analisada para ' + telefone + ': ' + analise.slice(0, 80));
-    } catch (e) {
-      console.error('Erro ao analisar imagem:', e.message);
-    }
-  }
+  configLoja.modo_agendado = !!dados.modoAgendado;
+  configLoja.hora_abertura_hoje = dados.horaAbertura || '';
 
   var historicoRaw = (conversaAtual && conversaAtual.mensagens) ? conversaAtual.mensagens.slice(-20) : [];
   var history = [];

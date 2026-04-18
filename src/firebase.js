@@ -75,7 +75,7 @@ export async function criarPedidoAberto(pedido) {
   var payload = Object.assign({}, pedido, {
     origem: 'whatsapp-bot',
     autoAceito: true,
-    status: 'aguardando',
+    status: pedido.status || 'aguardando',
     codigoConfirmacao: codigoConfirmacao,
     criadoEm: Date.now(),
   });
