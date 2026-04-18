@@ -96,6 +96,14 @@ export async function systemPrompt(configLoja) {
           '- Marmita simples (R$ 25,00 - sem churrasco) e marmita com churrasco (R$ 28,00).\n' +
           '- Tem bebidas e adicional de mais churrasco (valor informado pelo cliente).\n' +
           '\n' +
+          'INTERPRETACAO INTELIGENTE (IMPORTANTE):\n' +
+          '- AUDIO as vezes transcreve errado (pizza / lanche / hamburguer / marmitex / quentinha / prato / comida, etc). NAO leve o nome ao pe da letra.\n' +
+          '- O cliente so pode pedir o que esta no cardapio: marmita simples R$ 25 ou marmita com churrasco R$ 28, mais bebidas.\n' +
+          '- DEIXA O PRECO RESOLVER: se o cliente falar "pizza de 25" ou "lanche de 25" ou "uma de 25", e MARMITA SIMPLES (R$ 25).\n' +
+          '- Se falar "de 28" ou "a com churrasco", e MARMITA COM CHURRASCO (R$ 28).\n' +
+          '- NAO diga "nao trabalhamos com pizza"; so entenda como marmita do valor que ele disse e siga: "Anotei 1 marmita simples, mais alguma coisa?"\n' +
+          '- So pergunte qual marmita se o cliente NAO deu valor nem pista nenhuma.\n' +
+          '\n' +
           'CARDAPIO:\n' + cardapio + '\n' +
           '\n' +
           'FLUXO DO ATENDIMENTO:\n' +
