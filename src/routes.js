@@ -28,6 +28,34 @@ function authMiddleware(req, res, next) {
   next();
 }
 
+// ── Debounce: espera X ms apos a ultima msg do cliente antes de processar.
+// Se chegar outra msg dentro da janela, reseta o timer e junta tudo.
+// Cliente costuma mandar varias msgs seguidas completando o pensamento.
+var DEBOUNCE_MS = parseInt(process.env.DEBOUNCE_MS || '30000');
+var debouncePorTelefone = new Map();
+
+function agendarComDebounce(telefone, texto, pushName) {
+  var existing = debouncePorTelefone.get(telefone);
+  if (existing) {
+    clearTimeout(existing.timer);
+    existing.mensagens.push({ texto: texto, pushName: pushName });
+  } else {
+    existing = { mensagens: [{ texto: texto, pushName: pushName }] };
+    debouncePorTelefone.set(telefone, existing);
+  }
+
+  existing.timer = setTimeout(function() {
+    debouncePorTelefone.delete(telefone);
+    var msgs = existing.mensagens;
+    var textoJuntado = msgs.map(function(m) { return m.texto; }).join('\n');
+    var ultimoPush = msgs[msgs.length - 1].pushName;
+    console.log('Debounce liberou ' + msgs.length + ' msg(s) para ' + telefone);
+    processarComFila(telefone, textoJuntado, ultimoPush).catch(function(e) {
+      console.error('Erro fila:', e);
+    });
+  }, DEBOUNCE_MS);
+}
+
 // ── Fila de processamento por telefone ──────────────────────────
 var filaPorTelefone = new Map();
 
@@ -248,7 +276,7 @@ router.post('/webhook', async function(req, res) {
     }
   }
 
-  processarComFila(msg.telefone, msg.texto, msg.pushName).catch(function(e) { console.error('Erro fila:', e); });
+  agendarComDebounce(msg.telefone, msg.texto, msg.pushName);
 });
 
 // ── Endpoints da API ──────────────────────────────────────────
