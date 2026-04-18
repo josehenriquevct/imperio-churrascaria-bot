@@ -33,6 +33,15 @@ export async function systemPrompt(configLoja) {
               pixChaveNumeros = configLoja.chave_pix.replace(/[^0-9]/g, '');
       }
 
+  var nomeWhatsapp = (configLoja && configLoja.nome_whatsapp) ? String(configLoja.nome_whatsapp).trim() : '';
+  var nomeWhatsappTexto = '';
+  if (nomeWhatsapp) {
+    nomeWhatsappTexto = '\nNOME DO CONTATO NO WHATSAPP: "' + nomeWhatsapp + '"\n'
+      + '- Se isso parecer um NOME DE PESSOA REAL (mesmo que so o primeiro nome, ou com sobrenome), USE esse nome como o nome do cliente e NAO PERGUNTE o nome. Chame pelo nome no atendimento. Chame salvar_cliente com esse nome.\n'
+      + '- So PERGUNTE o nome se o contato for claramente NAO-NOME: numero ("123"), emoji puro, generico ("Cliente", "User", "WhatsApp"), apelido estranho, letra solta, ou vazio.\n'
+      + '- Em caso de duvida (ex: nome estrangeiro, apelido curto mas que pode ser nome), USE e siga em frente.\n';
+  }
+
   var agendadoTexto = '';
   if (configLoja && configLoja.modo_agendado) {
     var horaAbre = configLoja.hora_abertura_hoje || '10:30';
@@ -89,6 +98,7 @@ export async function systemPrompt(configLoja) {
           '- Tempo medio de entrega: 15 a 25 minutos\n' +
           '- Pagamento: Pix, Debito, Credito, Dinheiro' + pixTexto + '\n' +
           dadosClienteTexto + '\n' +
+          nomeWhatsappTexto +
           agendadoTexto +
           '\n' +
           'SOBRE O RESTAURANTE:\n' +
@@ -117,8 +127,9 @@ export async function systemPrompt(configLoja) {
           '   - Adicional de churrasco: pergunte quanto quer gastar e use adicionar_item com preco_manual.\n' +
           '\n' +
           '2. COLETAR DADOS (quando cliente disser "so isso"):\n' +
-          '   - Pergunte TUDO numa mensagem so: "Qual seu nome, ' + tipoTexto + ' e pagamento em que? (pix/debito/credito/dinheiro)"\n' +
-          '   - Use salvar_cliente assim que souber o nome.\n' +
+          '   - Se voce JA tem o nome (do WhatsApp ou ja cadastrado), NAO pergunte. So pergunte: "' + tipoTexto + ' e pagamento em que? (pix/debito/credito/dinheiro)"\n' +
+          '   - Se NAO tem nome: "Qual seu nome, ' + tipoTexto + ' e pagamento em que? (pix/debito/credito/dinheiro)"\n' +
+          '   - Use salvar_cliente com o nome (do WhatsApp se souber, ou o que o cliente disser).\n' +
           '   - Se delivery: peca localizacao GPS OU qualquer referencia que o entregador reconheca.\n' +
           '     O ENTREGADOR CONHECE BEM A CIDADE. Aceite QUALQUER referencia curta como endereco valido, por exemplo:\n' +
           '     "ponto de apoio da Cacu", "mercado do Zeca", "posto da esquina", "fazenda Santa Rita", "chacara do Joao", "casa da Dona Maria", "igreja matriz", etc.\n' +

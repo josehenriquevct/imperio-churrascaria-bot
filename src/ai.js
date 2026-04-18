@@ -49,6 +49,7 @@ export async function processarMensagem(telefone, texto, pushName) {
   };
   configLoja.modo_agendado = !!dados.modoAgendado;
   configLoja.hora_abertura_hoje = dados.horaAbertura || '';
+  configLoja.nome_whatsapp = dados.nome_whatsapp || '';
 
   var historicoRaw = (conversaAtual && conversaAtual.mensagens) ? conversaAtual.mensagens.slice(-20) : [];
   var history = [];
